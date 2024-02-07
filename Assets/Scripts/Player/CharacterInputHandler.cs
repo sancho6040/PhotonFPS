@@ -48,6 +48,16 @@ public class CharacterInputHandler : MonoBehaviour
         if (Input.GetButtonDown("Fire1"))
             isFireButtonPressed = true;
 
+        //Switch camera mode
+        if (Input.GetKeyDown(KeyCode.C))
+        {
+            //Switch the variable on our "local version" of NetworkPlayer
+            NetworkPlayer.Local.is3rdPersonCamera = !NetworkPlayer.Local.is3rdPersonCamera;
+
+            //Tell the State Authority which camera mode we are using
+            NetworkPlayer.Local.RPC_SetCameraMode(NetworkPlayer.Local.is3rdPersonCamera);
+        }
+
         //Set view
         localCameraHandler.SetViewInputVector(viewInputVector);
 
@@ -59,6 +69,9 @@ public class CharacterInputHandler : MonoBehaviour
 
         //Aim data
         networkInputData.aimForwardVector = localCameraHandler.transform.forward;
+        
+        //Camera position
+        networkInputData.cameraPosition = localCameraHandler.transform.position;
 
         //Move data
         networkInputData.movementInput = moveInputVector;

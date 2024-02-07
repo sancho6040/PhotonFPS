@@ -18,18 +18,15 @@ public class NetworkPlayer : NetworkBehaviour, IPlayerLeft
     public LocalCameraHandler localCameraHandler;
     public GameObject localUI;
 
+    //Camera mode
+    public bool is3rdPersonCamera { get; set; }
+
     //Other components
     NetworkInGameMessages networkInGameMessages;
 
     void Awake()
     {
         networkInGameMessages = GetComponent<NetworkInGameMessages>();
-    }
-
-    // Start is called before the first frame update
-    void Start()
-    {
-
     }
 
     public override void Spawned()
@@ -114,5 +111,13 @@ public class NetworkPlayer : NetworkBehaviour, IPlayerLeft
 
             isPublicJoinMessageSent = true;
         }
+    }
+
+    [Rpc(RpcSources.InputAuthority, RpcTargets.StateAuthority)]
+    public void RPC_SetCameraMode(bool is3rdPersonCamera, RpcInfo info = default)
+    {
+        Debug.Log($"[RPC] SetCameraMode. is3rdPersonCamera  {is3rdPersonCamera}");
+
+        this.is3rdPersonCamera = is3rdPersonCamera;
     }
 }

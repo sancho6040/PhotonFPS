@@ -48,6 +48,7 @@ GameObject:
   - component: {fileID: 3842028412693434221}
   - component: {fileID: 2677942014102770514}
   - component: {fileID: 5860853094162535205}
+  - component: {fileID: 2640797133175136202}
   m_Layer: 0
   m_Name: Camera
   m_TagString: Untagged
@@ -64,7 +65,7 @@ Transform:
   m_GameObject: {fileID: 2119280799025011096}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.153, z: 0}
+  m_LocalPosition: {x: 0, y: -0.72, z: 1.11022296e-17}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -111,7 +112,7 @@ Camera:
   m_Depth: 0
   m_CullingMask:
     serializedVersion: 2
-    m_Bits: 4294967295
+    m_Bits: 183
   m_RenderingPath: -1
   m_TargetTexture: {fileID: 0}
   m_TargetDisplay: 0
@@ -188,6 +189,42 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   cameraAnchorPoint: {fileID: 7308830638328569571}
+  localCamera: {fileID: 7120352074010770023}
+  localGun: {fileID: 2420728866065747659}
+--- !u!114 &2640797133175136202
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2119280799025011096}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 72ece51f2901e7445ab60da3685d6b5f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_ShowDebugText: 0
+  m_ShowCameraFrustum: 1
+  m_IgnoreTimeScale: 0
+  m_WorldUpOverride: {fileID: 0}
+  m_UpdateMethod: 2
+  m_BlendUpdateMethod: 1
+  m_DefaultBlend:
+    m_Style: 1
+    m_Time: 2
+    m_CustomCurve:
+      serializedVersion: 2
+      m_Curve: []
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+  m_CustomBlends: {fileID: 0}
+  m_CameraCutEvent:
+    m_PersistentCalls:
+      m_Calls: []
+  m_CameraActivatedEvent:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!1 &2420728866065747659
 GameObject:
   m_ObjectHideFlags: 0
@@ -632,12 +669,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _interpolationDataSource: 0
-  _isFiring: 0
   fireParticleSystem: {fileID: 8305055837124150602}
+  fireParticleSystemRemotePlayer: {fileID: 8305055837124150602}
   aimPoint: {fileID: 7308830638328569571}
   collisionLayers:
     serializedVersion: 2
     m_Bits: 129
+  _isFiring: 0
 --- !u!114 &3803615108130887650
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -943,7 +981,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &2676039393036992991
 Transform:
   m_ObjectHideFlags: 0
