@@ -7,16 +7,30 @@ public class CharacterMovementHandler : NetworkBehaviour
 {
 
     NetworkCharacterControllerPrototypeCustom characterController;
-    Camera playerCamera;
+    HpHandler hpHandler;
+
+    bool isSpawnedRequested = false;
 
     private void Awake()
     {
         characterController = GetComponent<NetworkCharacterControllerPrototypeCustom>();
-        playerCamera = GetComponentInChildren<Camera>();
+        hpHandler = GetComponent<HpHandler>();
     }
 
     public override void FixedUpdateNetwork()
     {
+        if (Object.HasInputAuthority)
+        {
+            if( isSpawnedRequested) 
+            {
+                Respawn();
+                return;
+            }
+
+            if (hpHandler.isDead) return;
+        }
+
+        //Get the input from the network
         if(GetInput(out NetworkInputData networkInputData))
         {
             //rotate view
@@ -45,8 +59,28 @@ public class CharacterMovementHandler : NetworkBehaviour
     {
         if(transform.position.y < -12)
         {
-            transform.position = Utils.GetRandomSpawnPoint();
+            if(Object.HasInputAuthority) 
+            {
+                Respawn();
+            }
         }
+    }
+
+    public void RequestRespawn()
+    {
+        isSpawnedRequested = true;
+    }
+
+    void Respawn()
+    {
+        characterController.TeleportToPosition(Utils.GetRandomSpawnPoint());
+        hpHandler.OnRespawned();
+        isSpawnedRequested = false;
+    }
+
+    public void SerCharacterControllerEnabled(bool isEnabled)
+    {
+        characterController.Controller.enabled = isEnabled;
     }
 
 
