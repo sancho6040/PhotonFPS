@@ -15,7 +15,7 @@ public class NetworkCharacterControllerPrototypeCustom : NetworkTransform
     public float braking = 10.0f;
     public float maxSpeed = 2.0f;
     public float rotationSpeed = 15.0f;
-    public float viewRotationSpeedY = 50f;
+    public float viewUpDownRotationSpeed = 50.0f;
 
     [Networked]
     [HideInInspector]
@@ -49,6 +49,9 @@ public class NetworkCharacterControllerPrototypeCustom : NetworkTransform
     {
         base.Spawned();
         CacheController();
+
+        // Caveat: this is needed to initialize the Controller's state and avoid unwanted spikes in its perceived velocity
+        Controller.Move(transform.position);
     }
 
     private void CacheController()
@@ -118,7 +121,6 @@ public class NetworkCharacterControllerPrototypeCustom : NetworkTransform
         else
         {
             horizontalVel = Vector3.ClampMagnitude(horizontalVel + direction * acceleration * deltaTime, maxSpeed);
-            //transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(direction), rotationSpeed * Runner.DeltaTime);
         }
 
         moveVelocity.x = horizontalVel.x;

@@ -1,10 +1,11 @@
 using Fusion;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class HpHandler : NetworkBehaviour
+public class HPHandler : NetworkBehaviour
 {
     [Networked(OnChanged = nameof(OnHPChanged))]
     byte HP { get; set; }
@@ -14,30 +15,35 @@ public class HpHandler : NetworkBehaviour
 
     bool isInitialized = false;
 
-    const byte startHP = 5;
+    const byte startingHP = 5;
 
-    public Color uiHitColor;
-    public Image uiHitImage;
+    public Color uiOnHitColor;
+    public Image uiOnHitImage;
 
     public MeshRenderer bodyMeshRenderer;
     Color defaultMeshBodyColor;
 
     public GameObject playerModel;
-    public GameObject deathGameobjectPrefab;
+    public GameObject deathGameObjectPrefab;
 
+    //Other components
     HitboxRoot hitboxRoot;
-
     CharacterMovementHandler characterMovementHandler;
+    NetworkInGameMessages networkInGameMessages;
+    NetworkPlayer networkPlayer;
 
     private void Awake()
     {
-        hitboxRoot = GetComponentInChildren<HitboxRoot>();
         characterMovementHandler = GetComponent<CharacterMovementHandler>();
+        hitboxRoot = GetComponentInChildren<HitboxRoot>();
+        networkInGameMessages = GetComponent<NetworkInGameMessages>();
+        networkPlayer = GetComponent<NetworkPlayer>();
     }
 
-    private void Start()
+    // Start is called before the first frame update
+    void Start()
     {
-        HP = startHP;
+        HP = startingHP;
         isDead = false;
 
         defaultMeshBodyColor = bodyMeshRenderer.material.color;
@@ -45,23 +51,19 @@ public class HpHandler : NetworkBehaviour
         isInitialized = true;
     }
 
-    IEnumerator onHitCO()
+    IEnumerator OnHitCO()
     {
         bodyMeshRenderer.material.color = Color.white;
 
         if (Object.HasInputAuthority)
-        {
-            uiHitImage.color = uiHitColor;
-        }
+            uiOnHitImage.color = uiOnHitColor;
 
         yield return new WaitForSeconds(0.2f);
 
         bodyMeshRenderer.material.color = defaultMeshBodyColor;
 
         if (Object.HasInputAuthority && !isDead)
-        {
-            uiHitImage.color = new Color(0, 0, 0, 0);
-        }
+            uiOnHitImage.color = new Color(0, 0, 0, 0);
     }
 
     IEnumerator ServerReviveCO()
@@ -71,88 +73,100 @@ public class HpHandler : NetworkBehaviour
         characterMovementHandler.RequestRespawn();
     }
 
-    //function only called on the server
-    public void OnTakeDamage()
+
+    //Function only called on the server
+    public void OnTakeDamage(string damageCausedByPlayerNickname)
     {
-        if (isDead) return;
+        //Only take damage while alive
+        if (isDead)
+            return;
 
         HP -= 1;
 
+        Debug.Log($"{Time.time} {transform.name} took damage got {HP} left ");
+
+        //Player died
         if (HP <= 0)
         {
+            networkInGameMessages.SendInGameRPCMessage(damageCausedByPlayerNickname, $"Killed <b>{networkPlayer.nickName.ToString()}</b>");
+
+            Debug.Log($"{Time.time} {transform.name} died");
+
             StartCoroutine(ServerReviveCO());
+
             isDead = true;
         }
     }
 
-
-    static void OnHPChanged(Changed<HpHandler> changed)
+    static void OnHPChanged(Changed<HPHandler> changed)
     {
         Debug.Log($"{Time.time} OnHPChanged value {changed.Behaviour.HP}");
 
-        //method to access non static funtions
         byte newHP = changed.Behaviour.HP;
 
+        //Load the old value
         changed.LoadOld();
+
         byte oldHP = changed.Behaviour.HP;
 
+        //Check if the HP has been decreased
         if (newHP < oldHP)
-        {
             changed.Behaviour.OnHPReduced();
-        }
     }
 
     private void OnHPReduced()
     {
-        if (!isInitialized) return;
+        if (!isInitialized)
+            return;
 
-        StartCoroutine(onHitCO());
+        StartCoroutine(OnHitCO());
     }
 
-    static void OnStateChanged(Changed<HpHandler> changed)
+    static void OnStateChanged(Changed<HPHandler> changed)
     {
-        Debug.Log($"{Time.time} OnStateChanged value {changed.Behaviour.isDead}");
+        Debug.Log($"{Time.time} OnStateChanged isDead {changed.Behaviour.isDead}");
 
-        //method to access non static funtions
         bool isDeadCurrent = changed.Behaviour.isDead;
 
+        //Load the old value
         changed.LoadOld();
+
         bool isDeadOld = changed.Behaviour.isDead;
 
+        //Handle on death for the player. Also check if the player was dead but is now alive in that case revive the player.
         if (isDeadCurrent)
-        {
             changed.Behaviour.OnDeath();
-        }
         else if (!isDeadCurrent && isDeadOld)
-        {
             changed.Behaviour.OnRevive();
-        }
     }
 
     private void OnDeath()
     {
+        Debug.Log($"{Time.time} OnDeath");
+
         playerModel.gameObject.SetActive(false);
         hitboxRoot.HitboxRootActive = false;
-        characterMovementHandler.SerCharacterControllerEnabled(false);
+        characterMovementHandler.SetCharacterControllerEnabled(false);
 
-        Instantiate(deathGameobjectPrefab, transform.position, Quaternion.identity);
+        Instantiate(deathGameObjectPrefab, transform.position, Quaternion.identity);
     }
+
     private void OnRevive()
     {
-        if(Object.HasInputAuthority)
-        {
-            uiHitImage.color = new Color(0, 0, 0, 0);
-        }
+        Debug.Log($"{Time.time} OnRevive");
+
+        if (Object.HasInputAuthority)
+            uiOnHitImage.color = new Color(0, 0, 0, 0);
 
         playerModel.gameObject.SetActive(true);
         hitboxRoot.HitboxRootActive = true;
-        characterMovementHandler.SerCharacterControllerEnabled(true);
+        characterMovementHandler.SetCharacterControllerEnabled(true);
     }
 
     public void OnRespawned()
     {
-        //reset variables
-        HP = startHP;
+        //Reset variables
+        HP = startingHP;
         isDead = false;
     }
 }

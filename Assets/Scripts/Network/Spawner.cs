@@ -10,9 +10,11 @@ public class Spawner : MonoBehaviour, INetworkRunnerCallbacks
 {
     public NetworkPlayer playerPrefab;
 
+    //Other compoents
     CharacterInputHandler characterInputHandler;
 
-    private void Start()
+    // Start is called before the first frame update
+    void Start()
     {
 
     }
@@ -21,24 +23,20 @@ public class Spawner : MonoBehaviour, INetworkRunnerCallbacks
     {
         if (runner.IsServer)
         {
-            Debug.Log("OnplayerJoined we are server. Spawning player");
+            Debug.Log("OnPlayerJoined we are server. Spawning player");
             runner.Spawn(playerPrefab, Utils.GetRandomSpawnPoint(), Quaternion.identity, player);
         }
+        else Debug.Log("OnPlayerJoined");
     }
 
     public void OnInput(NetworkRunner runner, NetworkInput input)
     {
-        if(characterInputHandler == null && NetworkPlayer.Local != null)
-        {
+        if (characterInputHandler == null && NetworkPlayer.Local != null)
             characterInputHandler = NetworkPlayer.Local.GetComponent<CharacterInputHandler>();
-        }
 
         if (characterInputHandler != null)
-        {
             input.Set(characterInputHandler.GetNetworkInput());
-        }
     }
-
 
     #region Interfaz Implemantation
     public void OnConnectedToServer(NetworkRunner runner) { Debug.Log("OnConnectedToServer"); }

@@ -1,66 +1,79 @@
 using Fusion;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class CharacterMovementHandler : NetworkBehaviour
 {
+    bool isRespawnRequested = false;
 
-    NetworkCharacterControllerPrototypeCustom characterController;
-    HpHandler hpHandler;
-
-    bool isSpawnedRequested = false;
+    //Other components
+    NetworkCharacterControllerPrototypeCustom networkCharacterControllerPrototypeCustom;
+    HPHandler hpHandler;
+    NetworkInGameMessages networkInGameMessages;
+    NetworkPlayer networkPlayer;
 
     private void Awake()
     {
-        characterController = GetComponent<NetworkCharacterControllerPrototypeCustom>();
-        hpHandler = GetComponent<HpHandler>();
+        networkCharacterControllerPrototypeCustom = GetComponent<NetworkCharacterControllerPrototypeCustom>();
+        hpHandler = GetComponent<HPHandler>();
+        networkInGameMessages = GetComponent<NetworkInGameMessages>();
+        networkPlayer = GetComponent<NetworkPlayer>();
     }
 
     public override void FixedUpdateNetwork()
     {
-        if (Object.HasInputAuthority)
+        if (Object.HasStateAuthority)
         {
-            if( isSpawnedRequested) 
+            if (isRespawnRequested)
             {
                 Respawn();
                 return;
             }
 
-            if (hpHandler.isDead) return;
+            //Don't update the clients position when they are dead
+            if (hpHandler.isDead)
+                return;
         }
 
         //Get the input from the network
-        if(GetInput(out NetworkInputData networkInputData))
+        if (GetInput(out NetworkInputData networkInputData))
         {
-            //rotate view
+            //Rotate the transform according to the client aim vector
             transform.forward = networkInputData.aimForwardVector;
 
-            //prevent the character from tilt
+            //Cancel out rotation on X axis as we don't want our character to tilt
             Quaternion rotation = transform.rotation;
             rotation.eulerAngles = new Vector3(0, rotation.eulerAngles.y, rotation.eulerAngles.z);
             transform.rotation = rotation;
 
-            //move
+            //Move
             Vector3 moveDirection = transform.forward * networkInputData.movementInput.y + transform.right * networkInputData.movementInput.x;
             moveDirection.Normalize();
 
-            characterController.Move(moveDirection);
+            networkCharacterControllerPrototypeCustom.Move(moveDirection);
 
-            //jump
-            if(networkInputData.isJumpPressed)
-            {
-                characterController.Jump();
-            }
+            //Jump
+            if (networkInputData.isJumpPressed)
+                networkCharacterControllerPrototypeCustom.Jump();
+
+            //Check if we've fallen off the world.
+            CheckFallRespawn();
         }
+
     }
 
-    void CheckfallRespawn()
+    void CheckFallRespawn()
     {
-        if(transform.position.y < -12)
+        if (transform.position.y < -12)
         {
-            if(Object.HasInputAuthority) 
+            if (Object.HasStateAuthority)
             {
+                Debug.Log($"{Time.time} Respawn due to fall outside of map at position {transform.position}");
+
+                networkInGameMessages.SendInGameRPCMessage(networkPlayer.nickName.ToString(), "fell off the world");
+
                 Respawn();
             }
         }
@@ -68,20 +81,20 @@ public class CharacterMovementHandler : NetworkBehaviour
 
     public void RequestRespawn()
     {
-        isSpawnedRequested = true;
+        isRespawnRequested = true;
     }
 
     void Respawn()
     {
-        characterController.TeleportToPosition(Utils.GetRandomSpawnPoint());
+        networkCharacterControllerPrototypeCustom.TeleportToPosition(Utils.GetRandomSpawnPoint());
+
         hpHandler.OnRespawned();
-        isSpawnedRequested = false;
+
+        isRespawnRequested = false;
     }
 
-    public void SerCharacterControllerEnabled(bool isEnabled)
+    public void SetCharacterControllerEnabled(bool isEnabled)
     {
-        characterController.Controller.enabled = isEnabled;
+        networkCharacterControllerPrototypeCustom.Controller.enabled = isEnabled;
     }
-
-
 }

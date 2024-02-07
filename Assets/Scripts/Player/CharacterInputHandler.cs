@@ -6,10 +6,10 @@ public class CharacterInputHandler : MonoBehaviour
 {
     Vector2 moveInputVector = Vector2.zero;
     Vector2 viewInputVector = Vector2.zero;
-    bool isJumpButtonPressed;
-    bool isFireButtonPressed;
+    bool isJumpButtonPressed = false;
+    bool isFireButtonPressed = false;
 
-
+    //Other components
     LocalCameraHandler localCameraHandler;
     CharacterMovementHandler characterMovementHandler;
 
@@ -19,56 +19,59 @@ public class CharacterInputHandler : MonoBehaviour
         characterMovementHandler = GetComponent<CharacterMovementHandler>();
     }
 
-    private void Start()
+    // Start is called before the first frame update
+    void Start()
     {
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
     }
 
-    private void Update()
+    // Update is called once per frame
+    void Update()
     {
-        if (!characterMovementHandler.Object.HasInputAuthority) return;
+        if (!characterMovementHandler.Object.HasInputAuthority)
+            return;
 
-
-        //input player Rotation
+        //View input
         viewInputVector.x = Input.GetAxis("Mouse X");
-        viewInputVector.y = Input.GetAxis("Mouse Y") * -1;
+        viewInputVector.y = Input.GetAxis("Mouse Y") * -1; //Invert the mouse look
 
-        //input player movement
+        //Move input
         moveInputVector.x = Input.GetAxis("Horizontal");
         moveInputVector.y = Input.GetAxis("Vertical");
 
-        if(Input.GetButton("Jump"))
-        {
+        //Jump
+        if (Input.GetButtonDown("Jump"))
             isJumpButtonPressed = true;
-        }
 
-        if (Input.GetButton("Fire1"))
-        {
+        //Fire
+        if (Input.GetButtonDown("Fire1"))
             isFireButtonPressed = true;
-        }
 
-        //set view rotation
+        //Set view
         localCameraHandler.SetViewInputVector(viewInputVector);
+
     }
 
     public NetworkInputData GetNetworkInput()
     {
         NetworkInputData networkInputData = new NetworkInputData();
 
-        //view data
+        //Aim data
         networkInputData.aimForwardVector = localCameraHandler.transform.forward;
+
         //Move data
         networkInputData.movementInput = moveInputVector;
+
         //Jump data
         networkInputData.isJumpPressed = isJumpButtonPressed;
-        //Fire data
-        networkInputData.isFirePressed = isFireButtonPressed;
 
-        //reset values
+        //Fire data
+        networkInputData.isFireButtonPressed = isFireButtonPressed;
+
+        //Reset variables now that we have read their states
         isJumpButtonPressed = false;
         isFireButtonPressed = false;
-
 
         return networkInputData;
     }
