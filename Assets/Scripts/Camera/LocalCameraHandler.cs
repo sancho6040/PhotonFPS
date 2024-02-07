@@ -38,10 +38,10 @@ public class LocalCameraHandler : MonoBehaviour
         localCamera.transform.position = cameraAnchorPoint.position;
 
         //rotate camera
-        cameraRotationX += viewInput.y * Time.deltaTime + networkCharacterController.viewRotationSpeedY;
+        cameraRotationX += viewInput.y * Time.deltaTime * networkCharacterController.viewRotationSpeedY;
         cameraRotationX = Mathf.Clamp(cameraRotationX, -90, 90);
 
-        cameraRotationY += viewInput.x * Time.deltaTime + networkCharacterController.rotationSpeed;
+        cameraRotationY += viewInput.x * Time.deltaTime * networkCharacterController.rotationSpeed;
 
         localCamera.transform.rotation = Quaternion.Euler(cameraRotationX, cameraRotationY, 0f);
 
