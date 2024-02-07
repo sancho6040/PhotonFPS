@@ -252,7 +252,7 @@ Transform:
   m_GameObject: {fileID: 2420728866065747659}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.341, y: -0.144, z: 0.547}
+  m_LocalPosition: {x: 0.289, y: -0.297, z: 0.54}
   m_LocalScale: {x: 0.2, y: 0.2, z: 0.5}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -891,7 +891,7 @@ GameObject:
   - component: {fileID: 8712345725186094892}
   - component: {fileID: 2482251770112183470}
   - component: {fileID: 7137754282872572841}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: Body
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -975,7 +975,7 @@ GameObject:
   - component: {fileID: 2676039393036992991}
   - component: {fileID: 522632204113422840}
   - component: {fileID: 5106689548223416555}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: Glases
   m_TagString: Untagged
   m_Icon: {fileID: 0}
