@@ -32,6 +32,8 @@ public class NetworkPlayer : NetworkBehaviour, IPlayerLeft
 
             Debug.Log("Spawn remote Player");
         }
+
+        transform.name = $"Player_{Object.Id}";
     }
 
     public void PlayerLeft(PlayerRef player)

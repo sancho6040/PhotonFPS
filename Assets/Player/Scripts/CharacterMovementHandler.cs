@@ -5,9 +5,6 @@ using UnityEngine;
 
 public class CharacterMovementHandler : NetworkBehaviour
 {
-    Vector2 viewinput;
-
-    float cameraRotationX = 0;
 
     NetworkCharacterControllerPrototypeCustom characterController;
     Camera playerCamera;
@@ -18,20 +15,17 @@ public class CharacterMovementHandler : NetworkBehaviour
         playerCamera = GetComponentInChildren<Camera>();
     }
 
-    private void Update()
-    {
-        cameraRotationX += viewinput.x * Time.deltaTime * characterController.viewRotationSpeedY;
-        cameraRotationX = Mathf.Clamp(cameraRotationX, -90, 90);
-
-        playerCamera.transform.localRotation = Quaternion.Euler(cameraRotationX, 0, 0);
-    }
-
     public override void FixedUpdateNetwork()
     {
         if(GetInput(out NetworkInputData networkInputData))
         {
-            //Rotate the view
-            characterController.Rotate(networkInputData.rotationInput);
+            //rotate view
+            transform.forward = networkInputData.aimForwardVector;
+
+            //prevent the character from tilt
+            Quaternion rotation = transform.rotation;
+            rotation.eulerAngles = new Vector3(0, rotation.eulerAngles.y, rotation.eulerAngles.z);
+            transform.rotation = rotation;
 
             //move
             Vector3 moveDirection = transform.forward * networkInputData.movementInput.y + transform.right * networkInputData.movementInput.x;
@@ -47,9 +41,13 @@ public class CharacterMovementHandler : NetworkBehaviour
         }
     }
 
-    public void SetViewInputVector(Vector2 viewInput)
+    void CheckfallRespawn()
     {
-        this.viewinput = viewInput;
+        if(transform.position.y < -12)
+        {
+            transform.position = Utils.GetRandomSpawnPoint();
+        }
     }
+
 
 }
