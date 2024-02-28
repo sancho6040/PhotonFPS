@@ -3,19 +3,20 @@ using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.PlayerLoop;
 using UnityEngine.UI;
 
 public class HPHandler : NetworkBehaviour
 {
     [Networked(OnChanged = nameof(OnHPChanged))]
-    byte HP { get; set; }
+    float HP { get; set; }
+    const float startingHP = 5;
+
 
     [Networked(OnChanged = nameof(OnStateChanged))]
     public bool isDead { get; set; }
 
     bool isInitialized = false;
-
-    const byte startingHP = 5;
 
     public Color uiOnHitColor;
     public Image uiOnHitImage;
@@ -31,6 +32,14 @@ public class HPHandler : NetworkBehaviour
     CharacterMovementHandler characterMovementHandler;
     NetworkInGameMessages networkInGameMessages;
     NetworkPlayer networkPlayer;
+
+    //--------------------------------------------------
+    [Header("Barra de vida")]
+
+    public Slider hpSlider;
+    public Image hpColor;
+    private float lerpSpeed;
+
 
     private void Awake()
     {
@@ -48,7 +57,18 @@ public class HPHandler : NetworkBehaviour
 
         defaultMeshBodyColor = bodyMeshRenderer.material.color;
 
+        restartHealthUI();
+
         isInitialized = true;
+    }
+    private void Update()
+    {
+        lerpSpeed = 3f * Time.deltaTime;
+
+        hpSlider.value = Mathf.Lerp(hpSlider.value, HP / startingHP, lerpSpeed);
+
+        Color nuevoColor = Color.Lerp(Color.red, Color.green, (HP / startingHP));
+        hpColor.color = nuevoColor;
     }
 
     IEnumerator OnHitCO()
@@ -75,7 +95,7 @@ public class HPHandler : NetworkBehaviour
 
 
     //Function only called on the server
-    public void OnTakeDamage(string damageCausedByPlayerNickname, byte damageAmount)
+    public void OnTakeDamage(string damageCausedByPlayerNickname, float damageAmount)
     {
         //Only take damage while alive
         if (isDead)
@@ -105,12 +125,12 @@ public class HPHandler : NetworkBehaviour
     {
         Debug.Log($"{Time.time} OnHPChanged value {changed.Behaviour.HP}");
 
-        byte newHP = changed.Behaviour.HP;
+        float newHP = changed.Behaviour.HP;
 
         //Load the old value
         changed.LoadOld();
 
-        byte oldHP = changed.Behaviour.HP;
+        float oldHP = changed.Behaviour.HP;
 
         //Check if the HP has been decreased
         if (newHP < oldHP)
@@ -171,5 +191,13 @@ public class HPHandler : NetworkBehaviour
         //Reset variables
         HP = startingHP;
         isDead = false;
+
+        restartHealthUI();
+    }
+
+    public void restartHealthUI()
+    {
+        hpSlider.value = HP / startingHP;
+        hpColor.color = Color.green;
     }
 }

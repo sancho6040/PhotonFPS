@@ -9,11 +9,16 @@ public class WeaponHandler : NetworkBehaviour
     public ParticleSystem fireParticleSystem;
     public ParticleSystem fireParticleSystemRemotePlayer;
 
+    public BulletProjectile bulletProjectile;
+
     [Header("Aim")]
     public Transform aimPoint;
+    public Transform muzzle;
 
     [Header("Collision")]
     public LayerMask collisionLayers;
+
+    public Animator animator;
 
 
     [Networked(OnChanged = nameof(OnFireChanged))]
@@ -58,6 +63,10 @@ public class WeaponHandler : NetworkBehaviour
         StartCoroutine(FireEffectCO());
 
         HPHandler hitHPHandler = CalculateFireDirection(aimForwardVector, cameraPosition, out Vector3 fireDirection);
+        BulletProjectile projectile = Runner.Spawn(bulletProjectile, muzzle.position, Quaternion.identity);
+        projectile.direction = fireDirection;
+
+        animator.SetTrigger("Shoot");
 
         if (hitHPHandler != null && Object.HasStateAuthority)
             hitHPHandler.OnTakeDamage(networkPlayer.nickName.ToString(), 1); ;

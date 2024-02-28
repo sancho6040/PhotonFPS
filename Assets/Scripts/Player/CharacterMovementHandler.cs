@@ -7,6 +7,7 @@ using UnityEngine;
 public class CharacterMovementHandler : NetworkBehaviour
 {
     bool isRespawnRequested = false;
+    public Animator animator;
 
     //Other components
     NetworkCharacterControllerPrototypeCustom networkCharacterControllerPrototypeCustom;
@@ -53,6 +54,8 @@ public class CharacterMovementHandler : NetworkBehaviour
             moveDirection.Normalize();
 
             networkCharacterControllerPrototypeCustom.Move(moveDirection);
+
+            animator.SetFloat("Speed", moveDirection.magnitude);
 
             //Jump
             if (networkInputData.isJumpPressed)
