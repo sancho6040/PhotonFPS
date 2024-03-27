@@ -993,10 +993,10 @@ MonoBehaviour:
   uiOnHitImage: {fileID: 8476379734126637125}
   bodyMeshRenderer: {fileID: 7137754282872572841}
   playerModel: {fileID: 2077062414969922217}
-  deathGameObjectPrefab: {fileID: 100004, guid: 1d2c7c5e75ceb7c4aa805e2b43d110df,
+  deathGameObjectPrefab: {fileID: 1892078723244562, guid: 46876a2780737ec45a19d62f88e5ce56,
     type: 3}
-  hpSlider: {fileID: 0}
-  hpColor: {fileID: 0}
+  hpSlider: {fileID: 2191678498314768053}
+  hpColor: {fileID: 8356608815914975304}
 --- !u!114 &3866537555307345394
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1628,6 +1628,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: InGameCanvas
+      objectReference: {fileID: 0}
+    - target: {fileID: 3047124546778548953, guid: 49495ced4bc8aa24085a9b6f29bce0f9,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 5699334977186665672, guid: 49495ced4bc8aa24085a9b6f29bce0f9,
         type: 3}

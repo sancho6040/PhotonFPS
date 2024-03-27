@@ -63,6 +63,8 @@ public class HPHandler : NetworkBehaviour
     }
     private void Update()
     {
+        if (!HasInputAuthority) return;
+
         lerpSpeed = 3f * Time.deltaTime;
 
         hpSlider.value = Mathf.Lerp(hpSlider.value, HP / startingHP, lerpSpeed);
@@ -93,6 +95,11 @@ public class HPHandler : NetworkBehaviour
         characterMovementHandler.RequestRespawn();
     }
 
+    private void RevivePlayer()
+    {
+        characterMovementHandler.RequestRespawn();
+    }
+
 
     //Function only called on the server
     public void OnTakeDamage(string damageCausedByPlayerNickname, float damageAmount)
@@ -114,6 +121,12 @@ public class HPHandler : NetworkBehaviour
             networkInGameMessages.SendInGameRPCMessage(damageCausedByPlayerNickname, $"Killed <b>{networkPlayer.nickName.ToString()}</b>");
 
             Debug.Log($"{Time.time} {transform.name} died");
+
+            //ServerReviveCO();
+
+            //Invoke("RevivePlayer", 3f);
+
+            //Destroy(gameObject, 3f);
 
             StartCoroutine(ServerReviveCO());
 

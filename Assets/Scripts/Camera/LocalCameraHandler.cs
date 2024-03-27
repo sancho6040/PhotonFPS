@@ -77,7 +77,7 @@ public class LocalCameraHandler : MonoBehaviour
                     Utils.SetRenderLayersInChildren(NetworkPlayer.Local.playerModel, LayerMask.NameToLayer("LocalPlayerModel"));
 
                     //Enable the local gun
-                    localGun.SetActive(true);
+                    //localGun.SetActive(true);
                 }
             }
         }

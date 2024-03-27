@@ -6,8 +6,9 @@ using UnityEngine;
 
 public class NetworkPlayer : NetworkBehaviour, IPlayerLeft
 {
-    public TextMeshProUGUI playerNickNameTM;
     public static NetworkPlayer Local { get; set; }
+
+    public TextMeshProUGUI playerNickNameTM;
     public Transform playerModel;
 
     [Networked(OnChanged = nameof(OnNickNameChanged))]
@@ -17,9 +18,11 @@ public class NetworkPlayer : NetworkBehaviour, IPlayerLeft
 
     public LocalCameraHandler localCameraHandler;
     public GameObject localUI;
+    public GameObject nicknameUI;
+
 
     //Camera mode
-    public bool is3rdPersonCamera { get; set; }
+    public bool is3rdPersonCamera { get; set; } = true;
 
     //Other components
     NetworkInGameMessages networkInGameMessages;
@@ -40,6 +43,7 @@ public class NetworkPlayer : NetworkBehaviour, IPlayerLeft
 
             //Disable main camera
             Camera.main.gameObject.SetActive(false);
+            nicknameUI.SetActive(false);
 
             RPC_SetNickName(PlayerPrefs.GetString("PlayerNickname"));
 
